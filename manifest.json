@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "AI Translator Assistant",
+  "version": "1.0.0",
+  "description": "Universal AI Translator & Communication Assistant for foreign-language workplaces",
+  "permissions": [
+    "storage",
+    "sidePanel",
+    "activeTab",
+    "clipboardRead"
+  ],
+  "host_permissions": [
+    "https://api-free.deepl.com/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "side_panel": {
+    "default_path": "src/sidepanel/sidepanel.html"
+  },
+  "action": {
+    "default_title": "Open AI Translator"
+  },
+  "background": {
+    "service_worker": "src/background.ts",
+    "type": "module"
+  },
+  "icons": {
+    "16": "public/icon16.png",
+    "48": "public/icon48.png",
+    "128": "public/icon128.png"
+  }
+}
