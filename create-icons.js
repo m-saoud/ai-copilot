@@ -1,16 +1,24 @@
 import fs from 'fs';
 import path from 'path';
+import sharp from 'sharp';
 
-const base64Png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
-const buffer = Buffer.from(base64Png, 'base64');
+const publicDir = path.resolve('public');
+const svgPath = path.join(publicDir, 'favicon.svg');
 
-const publicDir = 'public';
 if (!fs.existsSync(publicDir)) {
-  fs.mkdirSync(publicDir);
+  fs.mkdirSync(publicDir, { recursive: true });
 }
 
-fs.writeFileSync(path.join(publicDir, 'icon16.png'), buffer);
-fs.writeFileSync(path.join(publicDir, 'icon48.png'), buffer);
-fs.writeFileSync(path.join(publicDir, 'icon128.png'), buffer);
+async function generateIcons() {
+  const sizes = [16, 48, 128];
+  for (const size of sizes) {
+    const outputPath = path.join(publicDir, `icon${size}.png`);
+    await sharp(svgPath)
+      .resize(size, size)
+      .png()
+      .toFile(outputPath);
+    console.log(`Generated icon${size}.png (${size}x${size})`);
+  }
+}
 
-console.log('Icons generated successfully.');
+generateIcons().catch(console.error);

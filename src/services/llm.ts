@@ -1,5 +1,4 @@
 import type { LLMResult } from '../types'
-import { GoogleGenAI } from '@google/genai'
 
 
 // ✅ TL;DR — ملخص سريع للرسالة الواردة باستخدام Gemini
@@ -52,24 +51,45 @@ Respond ONLY with the polished message, no explanations.`
 
 async function callGemini(prompt: string, apiKey: string): Promise<LLMResult> {
   try {
-    const ai = new GoogleGenAI({ apiKey })
-    
-    const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
-      contents: prompt,
-      config: {
-        maxOutputTokens: 500,
-        temperature: 0.7,
+    // 💡 تم استخدام gemini-2.5-flash المتاح والمستقر في حسابك
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: prompt
+              }
+            ]
+          }
+        ],
+        generationConfig: {
+          maxOutputTokens: 500,
+          temperature: 0.7,
+        }
+      }),
     })
 
-    const textContent = response.text
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`Gemini API Error: ${response.status} - ${errorText}`)
+    }
+
+    const data = await response.json()
+    const textContent = data.candidates?.[0]?.content?.parts?.[0]?.text
 
     if (!textContent) {
       throw new Error('Invalid response from Gemini API')
     }
 
     return { content: textContent.trim() }
+
   } catch (err) {
     return { content: '', error: (err as Error).message }
   }
